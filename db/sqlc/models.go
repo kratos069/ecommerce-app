@@ -6,6 +6,8 @@ package db
 
 import (
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type CartItem struct {
@@ -30,14 +32,6 @@ type Order struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-type OrderItem struct {
-	OrderItemID int64   `json:"order_item_id"`
-	OrderID     int64   `json:"order_id"`
-	ProductID   int64   `json:"product_id"`
-	Quantity    int64   `json:"quantity"`
-	Price       float64 `json:"price"`
-}
-
 type Payment struct {
 	PaymentID     int64   `json:"payment_id"`
 	OrderID       int64   `json:"order_id"`
@@ -52,6 +46,7 @@ type Product struct {
 	ProductID     int64     `json:"product_id"`
 	Name          string    `json:"name"`
 	Description   string    `json:"description"`
+	ProductImage  string    `json:"product_image"`
 	Price         float64   `json:"price"`
 	StockQuantity int64     `json:"stock_quantity"`
 	CategoryID    int64     `json:"category_id"`
@@ -66,6 +61,17 @@ type Review struct {
 	Rating    int64     `json:"rating"`
 	Comment   string    `json:"comment"`
 	CreatedAt time.Time `json:"created_at"`
+}
+
+type Session struct {
+	ID           uuid.UUID `json:"id"`
+	Username     string    `json:"username"`
+	RefreshToken string    `json:"refresh_token"`
+	UserAgent    string    `json:"user_agent"`
+	ClientIp     string    `json:"client_ip"`
+	IsBlocked    bool      `json:"is_blocked"`
+	ExpiredAt    time.Time `json:"expired_at"`
+	CreatedAt    time.Time `json:"created_at"`
 }
 
 type User struct {

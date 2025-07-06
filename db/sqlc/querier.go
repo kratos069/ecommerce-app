@@ -6,19 +6,22 @@ package db
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 type Querier interface {
 	AddCartItem(ctx context.Context, arg AddCartItemParams) (CartItem, error)
 	ClearUserCart(ctx context.Context, userID int64) error
-	CountUserProductOrders(ctx context.Context, arg CountUserProductOrdersParams) (int64, error)
 	CreateOrder(ctx context.Context, arg CreateOrderParams) (Order, error)
 	CreatePayment(ctx context.Context, arg CreatePaymentParams) (Payment, error)
 	CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error)
 	CreateReview(ctx context.Context, arg CreateReviewParams) (Review, error)
+	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DecreaseProductStock(ctx context.Context, arg DecreaseProductStockParams) error
 	DeleteCartItem(ctx context.Context, cartItemID int64) error
+	DeleteProduct(ctx context.Context, productID int64) error
 	DeleteUser(ctx context.Context, userID int64) error
 	GetCartItemByUserAndProduct(ctx context.Context, arg GetCartItemByUserAndProductParams) (CartItem, error)
 	GetCartItemsByUser(ctx context.Context, userID int64) ([]CartItem, error)
@@ -28,6 +31,7 @@ type Querier interface {
 	GetProduct(ctx context.Context, productID int64) (Product, error)
 	GetProductForUpdate(ctx context.Context, productID int64) (Product, error)
 	GetReviewsForProduct(ctx context.Context, productID int64) ([]Review, error)
+	GetSessionByID(ctx context.Context, id uuid.UUID) (Session, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByID(ctx context.Context, userID int64) (User, error)
 	ListCategories(ctx context.Context) ([]Category, error)
@@ -37,6 +41,7 @@ type Querier interface {
 	ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error)
 	UpdateCartItemQuantity(ctx context.Context, arg UpdateCartItemQuantityParams) (CartItem, error)
 	UpdateOrderStatus(ctx context.Context, arg UpdateOrderStatusParams) (Order, error)
+	UpdateProduct(ctx context.Context, arg UpdateProductParams) (Product, error)
 }
 
 var _ Querier = (*Queries)(nil)

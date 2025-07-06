@@ -16,6 +16,7 @@ CREATE TABLE "Products" (
   "product_id" bigserial PRIMARY KEY,
   "name" varchar(100) NOT NULL,
   "description" text NOT NULL,
+  "product_image" text NOT NULL,
   "price" double precision NOT NULL,
   "stock_quantity" bigint NOT NULL,
   "category_id" bigint NOT NULL,

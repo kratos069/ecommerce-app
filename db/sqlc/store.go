@@ -11,6 +11,9 @@ type Store interface {
 	Querier
 	AddToCartTx(ctx context.Context,
 		arg AddToCartTxParams) (AddToCartTxResult, error)
+	CreateOrderAndPaymentTx(ctx context.Context,
+		arg CreateOrderAndPaymentTxParams,
+	) (CreateOrderAndPaymentTxResult, error)
 	// VerifyEmailTx(ctx context.Context,
 	//	arg VerifyEmailTxParams) (VerifyEmailTxResults, error)
 }
