@@ -13,6 +13,7 @@ func createRandomProduct(t *testing.T, stockQuantity int64) Product {
 	arg := CreateProductParams{
 		Name:          util.RandomProductTitle(),
 		Description:   util.RandomDescription(),
+		ProductImage:  util.RandomProductImageURL(),
 		Price:         util.RandomPrice(),
 		StockQuantity: stockQuantity,
 		CategoryID:    util.RandomCategoryID(),
@@ -24,6 +25,7 @@ func createRandomProduct(t *testing.T, stockQuantity int64) Product {
 
 	require.Equal(t, arg.Name, product.Name)
 	require.Equal(t, arg.Description, product.Description)
+	require.Equal(t, arg.ProductImage, product.ProductImage)
 	require.Equal(t, arg.Price, product.Price)
 	require.Equal(t, arg.StockQuantity, product.StockQuantity)
 	require.Equal(t, arg.CategoryID, product.CategoryID)
@@ -45,6 +47,7 @@ func TestGetProduct(t *testing.T) {
 	require.Equal(t, product1.ProductID, product2.ProductID)
 	require.Equal(t, product1.CategoryID, product2.CategoryID)
 	require.Equal(t, product1.Description, product2.Description)
+	require.Equal(t, product1.ProductImage, product2.ProductImage)
 	require.Equal(t, product1.StockQuantity, product2.StockQuantity)
 	require.Equal(t, product1.Price, product2.Price)
 	require.WithinDuration(t, product1.CreatedAt, product2.CreatedAt, time.Second)
@@ -71,4 +74,34 @@ func TestListProductsByCategoryID(t *testing.T) {
 		product.CategoryID)
 	require.NoError(t, err)
 	require.NotEmpty(t, products)
+}
+
+func TestUpdateProduct(t *testing.T) {
+	product1 := createRandomProduct(t, 10)
+
+	arg := UpdateProductParams{
+		ProductID:     product1.ProductID,
+		Name:          util.RandomOwner(),
+		ProductImage:  util.RandomProductImageURL(),
+		StockQuantity: util.RandomInt(1, 50),
+		Description:   util.RandomDescription(),
+		Price:         util.RandomPrice(),
+		CategoryID:    util.RandomCategoryID(),
+	}
+
+	product2, err := testStore.UpdateProduct(context.Background(), arg)
+	require.NoError(t, err)
+	require.NotEmpty(t, product2)
+
+	require.Equal(t, product1.ProductID, product2.ProductID)
+}
+
+func TestDeleteMovie(t *testing.T) {
+	product1 := createRandomProduct(t, 10)
+	err := testStore.DeleteProduct(context.Background(), product1.ProductID)
+	require.NoError(t, err)
+
+	product2, err := testStore.GetProduct(context.Background(), product1.ProductID)
+	require.Error(t, err)
+	require.Empty(t, product2)
 }

@@ -91,3 +91,8 @@ func RandomComment() string {
 	}
 	return string(comment)
 }
+
+// generates a random productImage
+func RandomProductImageURL() string {
+	return fmt.Sprintf("https://image.kratos69.org/t/p/w500/%s.jpg", RandomString(10))
+}

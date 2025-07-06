@@ -9,24 +9,6 @@ import (
 	"context"
 )
 
-const countUserProductOrders = `-- name: CountUserProductOrders :one
-SELECT COUNT(*) FROM "Orders" o
-JOIN "OrderItems" oi ON o.order_id = oi.order_id
-WHERE o.user_id = $1 AND oi.product_id = $2
-`
-
-type CountUserProductOrdersParams struct {
-	UserID    int64 `json:"user_id"`
-	ProductID int64 `json:"product_id"`
-}
-
-func (q *Queries) CountUserProductOrders(ctx context.Context, arg CountUserProductOrdersParams) (int64, error) {
-	row := q.db.QueryRow(ctx, countUserProductOrders, arg.UserID, arg.ProductID)
-	var count int64
-	err := row.Scan(&count)
-	return count, err
-}
-
 const createOrder = `-- name: CreateOrder :one
 INSERT INTO "Orders" (user_id, total_amount, status)
 VALUES ($1, $2, $3)
