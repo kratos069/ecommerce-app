@@ -65,5 +65,5 @@ git pull
 make server
 make evans
 package pb
-service InstaApp
+service e-commerce
 call CreateUser
