@@ -47,7 +47,7 @@ func (server *Server) setupRoutes() {
 	router.GET("/products/:id", server.getProductByID)
 	router.GET("/products/category/:id", server.listProductsByCategoryID)
 
-	// router.POST("/tokens/renew_access", server.renewAccessToken)
+	router.POST("/tokens/renew_access", server.renewAccessToken)
 
 	// for both users and admins
 	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker,

@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package pb;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/e-commerce/pb";
+
+message User {
+    string username = 1;
+    string email = 2;
+    google.protobuf.Timestamp created_at = 3;
+}

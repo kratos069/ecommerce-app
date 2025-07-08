@@ -1,6 +1,6 @@
 module github.com/e-commerce
 
-go 1.24.2
+go 1.24.4
 
 require (
 	github.com/aead/chacha20poly1305 v0.0.0-20201124145622-1a5aba2a8b29
@@ -14,6 +14,8 @@ require (
 	github.com/spf13/viper v1.20.1
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/crypto v0.37.0
+	google.golang.org/grpc v1.67.3
+	google.golang.org/protobuf v1.36.1
 )
 
 require (
@@ -64,6 +66,6 @@ require (
 	golang.org/x/sync v0.13.0 // indirect
 	golang.org/x/sys v0.32.0 // indirect
 	golang.org/x/text v0.24.0 // indirect
-	google.golang.org/protobuf v1.36.1 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20241223144023-3abc09e42ca8 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

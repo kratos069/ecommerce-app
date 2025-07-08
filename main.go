@@ -4,14 +4,19 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net"
 
 	"github.com/e-commerce/api"
 	db "github.com/e-commerce/db/sqlc"
+	"github.com/e-commerce/gapi"
+	"github.com/e-commerce/pb"
 	"github.com/e-commerce/util"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 func main() {
@@ -32,7 +37,8 @@ func main() {
 
 	store := db.NewStore(connPool)
 
-	runGinServer(config, store)
+	// runGinServer(config, store)
+	runGrpcServer(config, store)
 }
 
 func runDBMigration(migrationURL, dbSource string) {
@@ -48,11 +54,35 @@ func runDBMigration(migrationURL, dbSource string) {
 	fmt.Println("db migrated successfully")
 }
 
+// run grpc Server for grpc requests
+func runGrpcServer(config util.Config, store db.Store) {
+	server, err := gapi.NewServer(config, store)
+	if err != nil {
+		log.Fatalln("cannot create grpc server:", err)
+	}
+
+	grpcServer := grpc.NewServer()
+	pb.RegisterEcommerceServer(grpcServer, server)
+	reflection.Register(grpcServer) // client to know which funcs available on server
+
+	listener, err := net.Listen("tcp", config.GRPCServerAddress)
+	if err != nil {
+		log.Fatalln("cannot create listener:", err)
+	}
+
+	log.Printf("start grpc server at %s", listener.Addr().String())
+	err = grpcServer.Serve(listener)
+	if err != nil {
+		log.Fatalln("cannot start grpc server:", err)
+	}
+
+}
+
 // run Gin Server for HTTP requests
 func runGinServer(config util.Config, store db.Store) {
 	server, err := api.NewServer(config, store)
 	if err != nil {
-		log.Fatalln("cannot create server:", err)
+		log.Fatalln("cannot create gin server:", err)
 	}
 
 	err = server.Start(config.HTTPServerAddress)
