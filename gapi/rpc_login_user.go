@@ -6,7 +6,9 @@ import (
 	db "github.com/e-commerce/db/sqlc"
 	"github.com/e-commerce/pb"
 	"github.com/e-commerce/util"
+	"github.com/e-commerce/val"
 	"github.com/jackc/pgx/v5"
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -14,6 +16,11 @@ import (
 
 func (server *Server) LoginUser(ctx context.Context,
 	req *pb.LoginUserRequest) (*pb.LoginUserResponse, error) {
+	violations := validateLoginUserRequest(req)
+	if violations != nil {
+		return nil, invalidArgumentError(violations)
+	}
+	
 	user, err := server.store.GetUserByEmail(ctx, req.GetEmail())
 	if err != nil {
 		if err == pgx.ErrNoRows {
@@ -27,7 +34,7 @@ func (server *Server) LoginUser(ctx context.Context,
 
 	}
 
-	err = util.CheckPassword(req.Password, user.PasswordHash)
+	err = util.CheckPassword(req.GetPassword(), user.PasswordHash)
 	if err != nil {
 		return nil, status.Errorf(codes.PermissionDenied,
 			"wrong password")
@@ -57,13 +64,16 @@ func (server *Server) LoginUser(ctx context.Context,
 			"unable to create refresh token")
 	}
 
+	// extract metadata
+	mtdt := server.extractMetadata(ctx)
+
 	// create session
 	session, err := server.store.CreateSession(ctx, db.CreateSessionParams{
 		ID:           refreshPayload.ID,
 		Username:     accessPayload.Username,
 		RefreshToken: refreshToken,
-		UserAgent:    "",
-		ClientIp:     "",
+		UserAgent:    mtdt.UserAgent,
+		ClientIp:     mtdt.ClientIP,
 		IsBlocked:    false,
 		ExpiredAt:    refreshPayload.ExpiredAt,
 	})
@@ -82,4 +92,17 @@ func (server *Server) LoginUser(ctx context.Context,
 	}
 
 	return resp, nil
+}
+
+func validateLoginUserRequest(req *pb.LoginUserRequest) (
+	violations []*errdetails.BadRequest_FieldViolation) {
+	if err := val.ValidateEmail(req.GetEmail()); err != nil {
+		violations = append(violations, fieldViolation("email", err))
+	}
+
+	if err := val.ValidatePassword(req.GetPassword()); err != nil {
+		violations = append(violations, fieldViolation("password", err))
+	}
+
+	return violations
 }
