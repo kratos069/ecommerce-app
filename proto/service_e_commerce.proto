@@ -5,6 +5,7 @@ package pb;
 import "google/api/annotations.proto";
 import "rpc_create_user.proto";
 import "rpc_login_user.proto";
+import "rpc_create_product.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
 
 option go_package = "github.com/e-commerce/pb";
@@ -20,6 +21,7 @@ service Ecommerce {
       summary: "Create new user"
         };
  }
+
     rpc LoginUser (LoginUserRequest) returns (LoginUserResponse) {
         option (google.api.http) = {
             post: "/v1/login_user"
@@ -28,6 +30,17 @@ service Ecommerce {
         option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       description: "API to login user"
       summary: "login the user"
+        };
+    }
+
+    rpc CreateProduct(stream CreateProductRequest) returns (CreateProductResponse) {
+        option (google.api.http) = {
+            post: "/v1/create_product"
+            body: "*"
+    };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      description: "API to create a new product"
+      summary: "only admins are able to create a new product"
         };
     }
 }

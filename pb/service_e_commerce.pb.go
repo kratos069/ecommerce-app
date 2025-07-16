@@ -26,27 +26,32 @@ var File_service_e_commerce_proto protoreflect.FileDescriptor
 
 const file_service_e_commerce_proto_rawDesc = "" +
 	"\n" +
-	"\x18service_e_commerce.proto\x12\x02pb\x1a\x1cgoogle/api/annotations.proto\x1a\x15rpc_create_user.proto\x1a\x14rpc_login_user.proto\x1a.protoc-gen-openapiv2/options/annotations.proto2\x8e\x02\n" +
+	"\x18service_e_commerce.proto\x12\x02pb\x1a\x1cgoogle/api/annotations.proto\x1a\x15rpc_create_user.proto\x1a\x14rpc_login_user.proto\x1a\x18rpc_create_product.proto\x1a.protoc-gen-openapiv2/options/annotations.proto2\xc4\x03\n" +
 	"\tEcommerce\x12\x85\x01\n" +
 	"\n" +
 	"CreateUser\x12\x15.pb.CreateUserRequest\x1a\x16.pb.CreateUserResponse\"H\x92A+\x12\x0fCreate new user\x1a\x18API to create a new user\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/v1/create_user\x12y\n" +
-	"\tLoginUser\x12\x14.pb.LoginUserRequest\x1a\x15.pb.LoginUserResponse\"?\x92A#\x12\x0elogin the user\x1a\x11API to login user\x82\xd3\xe4\x93\x02\x13:\x01*\"\x0e/v1/login_userBp\x92AS\x12Q\n" +
+	"\tLoginUser\x12\x14.pb.LoginUserRequest\x1a\x15.pb.LoginUserResponse\"?\x92A#\x12\x0elogin the user\x1a\x11API to login user\x82\xd3\xe4\x93\x02\x13:\x01*\"\x0e/v1/login_user\x12\xb3\x01\n" +
+	"\rCreateProduct\x12\x18.pb.CreateProductRequest\x1a\x19.pb.CreateProductResponse\"k\x92AK\x12,only admins are able to create a new product\x1a\x1bAPI to create a new product\x82\xd3\xe4\x93\x02\x17:\x01*\"\x12/v1/create_product(\x01Bp\x92AS\x12Q\n" +
 	"\x0eE-Commerce App\":\n" +
 	"\tkratos069\x12\x1chttps://github.com/kratos069\x1a\x0fdummy@email.com2\x031.0Z\x18github.com/e-commerce/pbb\x06proto3"
 
 var file_service_e_commerce_proto_goTypes = []any{
-	(*CreateUserRequest)(nil),  // 0: pb.CreateUserRequest
-	(*LoginUserRequest)(nil),   // 1: pb.LoginUserRequest
-	(*CreateUserResponse)(nil), // 2: pb.CreateUserResponse
-	(*LoginUserResponse)(nil),  // 3: pb.LoginUserResponse
+	(*CreateUserRequest)(nil),     // 0: pb.CreateUserRequest
+	(*LoginUserRequest)(nil),      // 1: pb.LoginUserRequest
+	(*CreateProductRequest)(nil),  // 2: pb.CreateProductRequest
+	(*CreateUserResponse)(nil),    // 3: pb.CreateUserResponse
+	(*LoginUserResponse)(nil),     // 4: pb.LoginUserResponse
+	(*CreateProductResponse)(nil), // 5: pb.CreateProductResponse
 }
 var file_service_e_commerce_proto_depIdxs = []int32{
 	0, // 0: pb.Ecommerce.CreateUser:input_type -> pb.CreateUserRequest
 	1, // 1: pb.Ecommerce.LoginUser:input_type -> pb.LoginUserRequest
-	2, // 2: pb.Ecommerce.CreateUser:output_type -> pb.CreateUserResponse
-	3, // 3: pb.Ecommerce.LoginUser:output_type -> pb.LoginUserResponse
-	2, // [2:4] is the sub-list for method output_type
-	0, // [0:2] is the sub-list for method input_type
+	2, // 2: pb.Ecommerce.CreateProduct:input_type -> pb.CreateProductRequest
+	3, // 3: pb.Ecommerce.CreateUser:output_type -> pb.CreateUserResponse
+	4, // 4: pb.Ecommerce.LoginUser:output_type -> pb.LoginUserResponse
+	5, // 5: pb.Ecommerce.CreateProduct:output_type -> pb.CreateProductResponse
+	3, // [3:6] is the sub-list for method output_type
+	0, // [0:3] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -59,6 +64,7 @@ func file_service_e_commerce_proto_init() {
 	}
 	file_rpc_create_user_proto_init()
 	file_rpc_login_user_proto_init()
+	file_rpc_create_product_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package pb;
+
+import "product.proto";
+
+option go_package = "github.com/e-commerce/pb";
+
+message CreateProductRequest {
+  oneof data {
+    ProductInfo info = 1;
+    ImageChunk image_chunk = 2;
+  }
+}
+
+message CreateProductResponse {
+  string message = 1;
+  Product product = 2;
+}

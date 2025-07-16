@@ -2,10 +2,9 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"log"
 	"net"
 	"net/http"
+	"os"
 
 	"github.com/e-commerce/api"
 	db "github.com/e-commerce/db/sqlc"
@@ -19,6 +18,8 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rakyll/statik/fs"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -28,13 +29,19 @@ func main() {
 	// load ENV variables
 	config, err := util.LoadConfig(".")
 	if err != nil {
-		log.Fatalln("cannot load config file:", err)
+		log.Fatal().Msg("cannot load config file:")
+	}
+
+	// pretty logs in dev (instead of json)
+	if config.Environment == "development" {
+		log.Logger = log.Output(
+			zerolog.ConsoleWriter{Out: os.Stderr})
 	}
 
 	// conn to database
 	connPool, err := pgxpool.New(context.Background(), config.DBSource)
 	if err != nil {
-		log.Fatalln("cannot connect to the db:", err)
+		log.Fatal().Msg("cannot connect to the db")
 	}
 
 	// run db migrations
@@ -50,21 +57,21 @@ func main() {
 func runDBMigration(migrationURL, dbSource string) {
 	migration, err := migrate.New(migrationURL, dbSource)
 	if err != nil {
-		log.Fatalln("cannot create new migration instance:", err)
+		log.Fatal().Msg("cannot create new migration instance:")
 	}
 
 	if err = migration.Up(); err != nil && err != migrate.ErrNoChange {
-		log.Fatalln("failed to run migrate up:", err)
+		log.Fatal().Msg("failed to run migrate up:")
 	}
 
-	fmt.Println("db migrated successfully")
+	log.Info().Msg("db migrated successfully")
 }
 
 // run both grpc + http requests
 func runGatewayServer(config util.Config, store db.Store) {
 	server, err := gapi.NewServer(config, store)
 	if err != nil {
-		log.Fatalln("cannot create grpc server:", err)
+		log.Fatal().Msg("cannot create grpc server:")
 	}
 
 	// for having snake case for http response
@@ -85,7 +92,7 @@ func runGatewayServer(config util.Config, store db.Store) {
 
 	err = pb.RegisterEcommerceHandlerServer(ctx, grpcMux, server)
 	if err != nil {
-		log.Fatalln("cannot register handler server:", err)
+		log.Fatal().Msg("cannot register handler server:")
 	}
 
 	mux := http.NewServeMux()
@@ -97,7 +104,7 @@ func runGatewayServer(config util.Config, store db.Store) {
 	// server static resources as binary of Go's backend server
 	staticFS, err := fs.New()
 	if err != nil {
-		log.Fatalln("cannot create statik fs:", err)
+		log.Fatal().Msg("cannot create statik fs:")
 	}
 
 	swaggerHandler := http.StripPrefix("/swagger/",
@@ -106,14 +113,16 @@ func runGatewayServer(config util.Config, store db.Store) {
 
 	listener, err := net.Listen("tcp", config.HTTPServerAddress)
 	if err != nil {
-		log.Fatalln("cannot create listener:", err)
+		log.Fatal().Msg("cannot create listener:")
 	}
 
-	log.Printf("start HTTP gateway server at %s",
+	log.Info().Msgf("start HTTP gateway server at %s",
 		listener.Addr().String())
-	err = http.Serve(listener, mux)
+
+	handler := gapi.HttpLogger(mux) // logs of http requests
+	err = http.Serve(listener, handler)
 	if err != nil {
-		log.Fatalln("cannot start HTTP gateway server:", err)
+		log.Fatal().Msg("cannot start HTTP gateway server:")
 	}
 
 }
@@ -122,22 +131,26 @@ func runGatewayServer(config util.Config, store db.Store) {
 func runGrpcServer(config util.Config, store db.Store) {
 	server, err := gapi.NewServer(config, store)
 	if err != nil {
-		log.Fatalln("cannot create grpc server:", err)
+		log.Fatal().Msg("cannot create grpc server:")
 	}
 
-	grpcServer := grpc.NewServer()
+	// logs for server
+	grpcLogger := grpc.UnaryInterceptor(gapi.GrpcLogger)
+
+	// 10 mb max streaming RPC msg size
+	grpcServer := grpc.NewServer(grpcLogger, grpc.MaxRecvMsgSize(10<<20))
 	pb.RegisterEcommerceServer(grpcServer, server)
 	reflection.Register(grpcServer) // client to know which funcs available on server
 
 	listener, err := net.Listen("tcp", config.GRPCServerAddress)
 	if err != nil {
-		log.Fatalln("cannot create listener:", err)
+		log.Fatal().Msg("cannot create listener:")
 	}
 
-	log.Printf("start grpc server at %s", listener.Addr().String())
+	log.Info().Msgf("start grpc server at %s", listener.Addr().String())
 	err = grpcServer.Serve(listener)
 	if err != nil {
-		log.Fatalln("cannot start grpc server:", err)
+		log.Fatal().Msg("cannot start grpc server:")
 	}
 
 }
@@ -146,11 +159,11 @@ func runGrpcServer(config util.Config, store db.Store) {
 func runGinServer(config util.Config, store db.Store) {
 	server, err := api.NewServer(config, store)
 	if err != nil {
-		log.Fatalln("cannot create gin server:", err)
+		log.Fatal().Msg("cannot create gin server:")
 	}
 
 	err = server.Start(config.HTTPServerAddress)
 	if err != nil {
-		log.Fatalln("cannot start server:", err)
+		log.Fatal().Msg("cannot start server:")
 	}
 }

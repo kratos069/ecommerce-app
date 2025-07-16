@@ -19,8 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Ecommerce_CreateUser_FullMethodName = "/pb.Ecommerce/CreateUser"
-	Ecommerce_LoginUser_FullMethodName  = "/pb.Ecommerce/LoginUser"
+	Ecommerce_CreateUser_FullMethodName    = "/pb.Ecommerce/CreateUser"
+	Ecommerce_LoginUser_FullMethodName     = "/pb.Ecommerce/LoginUser"
+	Ecommerce_CreateProduct_FullMethodName = "/pb.Ecommerce/CreateProduct"
 )
 
 // EcommerceClient is the client API for Ecommerce service.
@@ -29,6 +30,7 @@ const (
 type EcommerceClient interface {
 	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error)
 	LoginUser(ctx context.Context, in *LoginUserRequest, opts ...grpc.CallOption) (*LoginUserResponse, error)
+	CreateProduct(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[CreateProductRequest, CreateProductResponse], error)
 }
 
 type ecommerceClient struct {
@@ -59,12 +61,26 @@ func (c *ecommerceClient) LoginUser(ctx context.Context, in *LoginUserRequest, o
 	return out, nil
 }
 
+func (c *ecommerceClient) CreateProduct(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[CreateProductRequest, CreateProductResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &Ecommerce_ServiceDesc.Streams[0], Ecommerce_CreateProduct_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[CreateProductRequest, CreateProductResponse]{ClientStream: stream}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Ecommerce_CreateProductClient = grpc.ClientStreamingClient[CreateProductRequest, CreateProductResponse]
+
 // EcommerceServer is the server API for Ecommerce service.
 // All implementations must embed UnimplementedEcommerceServer
 // for forward compatibility.
 type EcommerceServer interface {
 	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
 	LoginUser(context.Context, *LoginUserRequest) (*LoginUserResponse, error)
+	CreateProduct(grpc.ClientStreamingServer[CreateProductRequest, CreateProductResponse]) error
 	mustEmbedUnimplementedEcommerceServer()
 }
 
@@ -80,6 +96,9 @@ func (UnimplementedEcommerceServer) CreateUser(context.Context, *CreateUserReque
 }
 func (UnimplementedEcommerceServer) LoginUser(context.Context, *LoginUserRequest) (*LoginUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LoginUser not implemented")
+}
+func (UnimplementedEcommerceServer) CreateProduct(grpc.ClientStreamingServer[CreateProductRequest, CreateProductResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method CreateProduct not implemented")
 }
 func (UnimplementedEcommerceServer) mustEmbedUnimplementedEcommerceServer() {}
 func (UnimplementedEcommerceServer) testEmbeddedByValue()                   {}
@@ -138,6 +157,13 @@ func _Ecommerce_LoginUser_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Ecommerce_CreateProduct_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(EcommerceServer).CreateProduct(&grpc.GenericServerStream[CreateProductRequest, CreateProductResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Ecommerce_CreateProductServer = grpc.ClientStreamingServer[CreateProductRequest, CreateProductResponse]
+
 // Ecommerce_ServiceDesc is the grpc.ServiceDesc for Ecommerce service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -154,6 +180,12 @@ var Ecommerce_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Ecommerce_LoginUser_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "CreateProduct",
+			Handler:       _Ecommerce_CreateProduct_Handler,
+			ClientStreams: true,
+		},
+	},
 	Metadata: "service_e_commerce.proto",
 }
