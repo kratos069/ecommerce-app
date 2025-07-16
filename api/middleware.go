@@ -55,7 +55,8 @@ func authMiddleware(tokenMaker token.Maker, accessibleRoles []string) gin.Handle
 
 		if !hasPermissions(payload.Role, accessibleRoles) {
 			err := fmt.Errorf("permission denied")
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errResponse(err))
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, 
+				errResponse(err))
 			return
 		}
 

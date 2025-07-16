@@ -1,11 +1,12 @@
 package util
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"mime/multipart"
-	"os"
 
 	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
@@ -22,7 +23,8 @@ func NewCloudinaryService() (*CloudinaryService, error) {
 		log.Fatalln("cannot load config file:", err)
 	}
 
-	cld, err := cloudinary.NewFromParams(config.CloudName, config.CloudApiKey, config.CloudApiSecret)
+	cld, err := cloudinary.NewFromParams(
+		config.CloudName, config.CloudApiKey, config.CloudApiSecret)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize Cloudinary: %w", err)
 	}
@@ -30,45 +32,56 @@ func NewCloudinaryService() (*CloudinaryService, error) {
 	return &CloudinaryService{cloudinary: cld}, nil
 }
 
-// Upload an image to Cloudinary from a local file path
-func (cs *CloudinaryService) UploadImage(ctx context.Context,
-	file *multipart.FileHeader) (string, error) {
-	// Remove from local
-	defer func() {
-		os.Remove("uploads/" + file.Filename)
-	}()
-
-	// Set the upload parameters (you can customize these as needed)
-	uploadParams := uploader.UploadParams{
-		Folder: "ecommerce", // specify folder in Cloudinary
+// UploadBytes uploads raw image data by wrapping it in an io.Reader.
+func (cs *CloudinaryService) UploadBytes(
+	ctx context.Context,
+	data []byte,
+) (string, error) {
+	params := uploader.UploadParams{
+		Folder: "ecommerce", // folder in cloudinary cloud
 	}
 
-	// Perform the upload
-	uploadResult, err := cs.cloudinary.Upload.Upload(ctx, file, uploadParams)
+	// Wrap byte slice in a reader
+	reader := bytes.NewReader(data)
+
+	result, err := cs.cloudinary.Upload.Upload(ctx, reader, params)
 	if err != nil {
-		return "", fmt.Errorf("failed to upload file to Cloudinary: %w", err)
+		return "", fmt.Errorf("failed to upload bytes: %w", err)
 	}
-
-	// Print the entire upload result for debugging
-	fmt.Printf("Upload result: %+v\n", uploadResult)
-
-	// Ensure the SecureURL is part of the result, and then return it
-	if uploadResult.SecureURL == "" {
+	if result.SecureURL == "" {
 		return "", fmt.Errorf("uploaded image URL is empty")
 	}
 
-	// Log the URL of the uploaded image for debugging
-	fmt.Printf("Uploaded image URL: %s\n", uploadResult.SecureURL)
-
-	// Return the secure URL of the uploaded image
-	return uploadResult.SecureURL, nil
+	return result.SecureURL, nil
 }
 
-// Delete an image from Cloudinary by its Public ID
-func (cs *CloudinaryService) DeleteImage(ctx context.Context, publicID string) error {
-	result, err := cs.cloudinary.Upload.Destroy(ctx, uploader.DestroyParams{
-		PublicID: publicID,
-	})
+// UploadImage uploads an image from a multipart.FileHeader
+func (cs *CloudinaryService) UploadImage(ctx context.Context,
+	file *multipart.FileHeader) (string, error) {
+	src, err := file.Open()
+	if err != nil {
+		return "", err
+	}
+	defer src.Close()
+
+	// Read file content into bytes
+	data, err := io.ReadAll(src)
+	if err != nil {
+		return "", fmt.Errorf("failed to read file: %w", err)
+	}
+
+	return cs.UploadBytes(ctx, data)
+}
+
+// DeleteImage deletes an image by its Public ID
+func (cs *CloudinaryService) DeleteImage(
+	ctx context.Context,
+	publicID string,
+) error {
+	result, err := cs.cloudinary.Upload.Destroy(ctx,
+		uploader.DestroyParams{
+			PublicID: publicID,
+		})
 	if err != nil {
 		return fmt.Errorf("failed to delete image from Cloudinary: %w", err)
 	}

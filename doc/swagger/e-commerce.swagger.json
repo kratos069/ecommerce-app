@@ -21,6 +21,41 @@
     "application/json"
   ],
   "paths": {
+    "/v1/create_product": {
+      "post": {
+        "summary": "only admins are able to create a new product",
+        "description": "API to create a new product",
+        "operationId": "Ecommerce_CreateProduct",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbCreateProductResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " (streaming inputs)",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbCreateProductRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Ecommerce"
+        ]
+      }
+    },
     "/v1/create_user": {
       "post": {
         "summary": "Create new user",
@@ -91,6 +126,28 @@
     }
   },
   "definitions": {
+    "pbCreateProductRequest": {
+      "type": "object",
+      "properties": {
+        "info": {
+          "$ref": "#/definitions/pbProductInfo"
+        },
+        "imageChunk": {
+          "$ref": "#/definitions/pbImageChunk"
+        }
+      }
+    },
+    "pbCreateProductResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "product": {
+          "$ref": "#/definitions/pbProduct"
+        }
+      }
+    },
     "pbCreateUserRequest": {
       "type": "object",
       "properties": {
@@ -110,6 +167,15 @@
       "properties": {
         "user": {
           "$ref": "#/definitions/pbUser"
+        }
+      }
+    },
+    "pbImageChunk": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "string",
+          "format": "byte"
         }
       }
     },
@@ -146,6 +212,60 @@
         "refreshTokenExpiresAt": {
           "type": "string",
           "format": "date-time"
+        }
+      }
+    },
+    "pbProduct": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "productImage": {
+          "type": "string",
+          "title": "URL from Cloudinary"
+        },
+        "price": {
+          "type": "number",
+          "format": "double"
+        },
+        "stockQuantity": {
+          "type": "string",
+          "format": "int64"
+        },
+        "categoryId": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "pbProductInfo": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "stockQuantity": {
+          "type": "string",
+          "format": "int64"
+        },
+        "categoryId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "price": {
+          "type": "number",
+          "format": "double"
         }
       }
     },

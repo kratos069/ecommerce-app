@@ -354,11 +354,11 @@ func uploadToCloud(ctx *gin.Context) (string, error) {
 	}
 
 	// Upload the image locally
-	err = ctx.SaveUploadedFile(file, "uploads/"+file.Filename)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errResponse(err))
-		return "", err
-	}
+	// err = ctx.SaveUploadedFile(file, "uploads/"+file.Filename)
+	// if err != nil {
+	// 	ctx.JSON(http.StatusInternalServerError, errResponse(err))
+	// 	return "", err
+	// }
 
 	cloudService, err := util.NewCloudinaryService()
 	if err != nil {

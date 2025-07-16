@@ -33,6 +33,9 @@ test:
 server:
 	go run main.go
 
+client:
+	go run client/cmd/main.go
+
 mock:
 	mockgen -package mockdb -destination db/mock/store.go github.com/e-commerce/db/sqlc Store
 
@@ -61,4 +64,4 @@ evans:
 redis:
 	docker run --name redis -p 6379:6379 -d redis:7-alpine
 
-.PHONY: new_migration redis evans proto db_schema db_docs postgres createdb dropdb migrateup migratedown sqlc test server mock migrateup1 migratedown1
+.PHONY: client new_migration redis evans proto db_schema db_docs postgres createdb dropdb migrateup migratedown sqlc test server mock migrateup1 migratedown1
