@@ -13,19 +13,29 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-south-1
+
+      - name: Ensure ECR repository exists
+        run: |
+          aws ecr describe-repositories --repository-names ecommerce || \
+          aws ecr create-repository --repository-name ecommerce
 
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Load Secrets and save to app.env
-        run: aws secretsmanager get-secret-value --secret-id ecommerce --query SecretString --output text |jq -r 'to_entries|map("\(.key)=\(.value)")|.[]' > app.env
+        run: |
+          aws secretsmanager get-secret-value --secret-id ecommerce --query SecretString --output text \
+          | jq -r 'to_entries|map("\(.key)=\(.value)")|.[]' > app.env
 
       - name: Debug ECR Registry Output
         run: echo "Registry is ${{ steps.login-ecr.outputs.registry }}"
@@ -39,3 +49,4 @@ jobs:
           docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker tag $REGISTRY/$REPOSITORY:$IMAGE_TAG $REGISTRY/$REPOSITORY:latest
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/$REPOSITORY:latest
