@@ -41,3 +41,16 @@ git push origin ft/newFeature
 (back in terminal)
 git checkout main
 git pull
+
+# wait-for.sh
+waits for (blocks) the postgres conn to be estabished
+# start.sh
+starts the app after the conn is established
+
+# install golang-migrate locally
+curl -L https://github.com/golang-migrate/migrate/releases/latest/download/migrate.linux-amd64.tar.gz \
+  -o migrate.tar.gz && \
+tar -xvzf migrate.tar.gz && \
+sudo mv migrate /usr/local/bin/ && \
+rm migrate.tar.gz && \
+migrate -version
