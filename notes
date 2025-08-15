@@ -54,3 +54,32 @@ tar -xvzf migrate.tar.gz && \
 sudo mv migrate /usr/local/bin/ && \
 rm migrate.tar.gz && \
 migrate -version
+
+# updated permissions in IAM permissions
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ecr:GetAuthorizationToken",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:CompleteLayerUpload",
+                "ecr:DescribeRepositories",
+                "ecr:InitiateLayerUpload",
+                "ecr:PutImage",
+                "ecr:UploadLayerPart"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:DescribeSecret"
+            ],
+            # add resource from secrets manager
+            "Resource": "arn:aws:secretsmanager:ap-south-1:123456789123:secret:e-commerce-ELP5xl"
+        }
+    ]
+}

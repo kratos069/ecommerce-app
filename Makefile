@@ -1,4 +1,5 @@
 DB_URL=postgresql://root:secret@localhost:5432/e-commerce?sslmode=disable
+PROD_DB_URL=postgresql://root:KtfQ21vmpCvzho94VKNK@database-2.c5mqc4kawird.ap-south-1.rds.amazonaws.com:5432/e_commerce
 
 # to run container from an image
 postgres:
@@ -15,6 +16,10 @@ dropdb:
 
 migrateup:
 	migrate -path db/migration -database "$(DB_URL)" -verbose up
+
+# for production (AWS RDS)
+migrateupp:
+	migrate -path db/migration -database "$(PROD_DB_URL)" -verbose up
 
 migrateup1:
 	migrate -path db/migration -database "$(DB_URL)" -verbose up 1
