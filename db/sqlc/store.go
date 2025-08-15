@@ -14,8 +14,6 @@ type Store interface {
 	CreateOrderAndPaymentTx(ctx context.Context,
 		arg CreateOrderAndPaymentTxParams,
 	) (CreateOrderAndPaymentTxResult, error)
-	// VerifyEmailTx(ctx context.Context,
-	//	arg VerifyEmailTxParams) (VerifyEmailTxResults, error)
 }
 
 // SQLStore provides all funcs for SQL queries and transactions
