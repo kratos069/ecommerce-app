@@ -68,7 +68,9 @@ migrate -version
                 "ecr:DescribeRepositories",
                 "ecr:InitiateLayerUpload",
                 "ecr:PutImage",
-                "ecr:UploadLayerPart"
+                "ecr:UploadLayerPart",
+                "ecr:BatchGetImage",
+                "ecr:GetDownloadUrlForLayer"
             ],
             "Resource": "*"
         },
@@ -83,3 +85,6 @@ migrate -version
         }
     ]
 }
+
+# docker login from terminal for aws
+aws ecr get-login-password | docker login --username AWS --password-stdin 123456789123.dkr.ecr.ap-south-1.amazonaws.com
