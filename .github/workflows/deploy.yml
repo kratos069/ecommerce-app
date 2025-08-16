@@ -30,11 +30,6 @@ jobs:
       - name: Load Secrets and Save to app.env
         run: aws secretsmanager get-secret-value --secret-id e-commerce --query SecretString --output text | jq -r 'to_entries|map("\(.key)=\(.value)")|.[]' > app.env
 
-      - name: Load Secrets and save to app.env
-        run: |
-          aws secretsmanager get-secret-value --secret-id ecommerce --query SecretString --output text \
-          | jq -r 'to_entries|map("\(.key)=\(.value)")|.[]' > app.env
-
       - name: Debug ECR Registry Output
         run: echo "Registry is ${{ steps.login-ecr.outputs.registry }}"
 
