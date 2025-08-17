@@ -4,7 +4,7 @@ migrate create -ext sql -dir db/migration -seq add_users
 # <!-- access postgres shell -->
 docker exec -it postgres17 psql -U root
 
-# <!-- github upload steps -->
+# <!-- github upload steps --->
 git init
 git add .
 git commit -m "message for commit..."
